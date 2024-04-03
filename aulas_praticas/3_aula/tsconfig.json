@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "outFile": "dist/index.js",
+    "target": "ES6"
+  }
+}
