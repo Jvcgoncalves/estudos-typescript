@@ -14,9 +14,15 @@ class Menu{
         case 2:
           HandleUserOptionFunctions.addMemberToSpaceshipCrew()
         break;
+        case 3:
+          HandleUserOptionFunctions.sendToMission()
+        break;
         case 4:
           alert(HandleUserOptionFunctions.listAllSpaceships())
-        break
+        break;
+        case 5:
+          HandleUserOptionFunctions.deleteSpaceshipMember()
+        break;
         case 6:
           alert("Finalizando o sistema...")
         break;
@@ -59,7 +65,7 @@ class HandleUserOptionFunctions{
   }
 
   static addMemberToSpaceshipCrew(){
-    this.#spaceshipName = prompt(`${this.listAllSpaceships()} \n Qual o nome da nave que deseja adicionar tripulante`)
+    this.#spaceshipName = prompt(`Qual o nome da nave que deseja adicionar tripulante \n ${this.listAllSpaceships()}`)
     const shipIndex: number = this.#getShip({name: this.#spaceshipName});
     if(shipIndex < 0) return alert(`Nave não encontrada`)
 
@@ -68,13 +74,13 @@ class HandleUserOptionFunctions{
   }
 
   static listAllSpaceships(): string{
-    const text:string = spaceships.reduce((finalText, currentText ):string =>{
+    const text:string = spaceships.reduce((finalText, currentText ): string => {
       finalText += `
       Nome da nave: ${currentText.shipName}
-      Nome da nave: ${currentText.pilot}
-      Nome da nave: ${currentText.crewLimit}
-      Nome da nave: ${currentText.showCrewMembers()}
-      Nome da nave: ${currentText.inMission === false ? "Não":"Sim"}
+      Nome do piloto: ${currentText.pilot}
+      Quantidade máxima de tripulantes: ${currentText.crewLimit}
+      Tripulantes: ${currentText.showCrewMembers()}
+      Em missão: ${currentText.inMission === false ? "Não" : "Sim"}
       `      
       return finalText
     }, "") 
@@ -83,6 +89,27 @@ class HandleUserOptionFunctions{
 
   static #getShip({name}: {name: string }){
     return spaceships.findIndex(ship => ship.shipName.toLocaleLowerCase() === name.toLocaleLowerCase())
+  }
+
+  static sendToMission(){
+    this.#spaceshipName = prompt(`Qual o nome da nave que deseja enviar para uma missão \n ${this.listAllSpaceships()}`)
+    const shipIndex: number = this.#getShip({name: this.#spaceshipName});
+
+    if(shipIndex < 0) return alert(`Nave não encontrada`)
+
+    spaceships[shipIndex].sendShipToMission()
+  }
+
+  static deleteSpaceshipMember(){
+    this.#spaceshipName = prompt(`Qual o nome da nave que deseja remover um tripulante \n ${this.listAllSpaceships()}`)
+
+    const shipIndex: number = this.#getShip({name: this.#spaceshipName})
+
+    if(shipIndex < 0) return alert(`Nave não encontrada`)
+
+    this.#newCrewMember = prompt(`Qual o nome do tripulante que deseja remover
+    ${spaceships[shipIndex].showCrewMembers()}`)
+    spaceships[shipIndex].removeCrewMember({name: this.#newCrewMember})
   }
 }
 
@@ -93,11 +120,13 @@ class Spaceship{
   crewLimit: number
   crew: string[] = []
   inMission: boolean = false
+  minimumCrewMembers: number
 
   constructor({shipName, pilot, crewLimit}: {shipName: string, pilot: string, crewLimit: number}){
     this.shipName = shipName
     this.pilot = pilot
     this.crewLimit = crewLimit
+    this.minimumCrewMembers = Math.round((crewLimit / 3) - 0.5)
   }
 
   addCrewMember({name}: {name: string}){
@@ -109,6 +138,7 @@ class Spaceship{
       alert(`Tripulante ${name} adicionado à nave ${this.shipName}`)
     }
   }
+
   removeCrewMember({name}: {name: string}){
     if(!this.crew.find(member => member === name)){
       alert(`Membro não encontrado`)
@@ -122,6 +152,13 @@ class Spaceship{
       finalText += `${currentText} - `
       return finalText
     }, "")
+  }
+
+  sendShipToMission(){
+    if(this.inMission) return alert("A nave já está em missão")
+    if(this.crew.length < this.minimumCrewMembers) return alert(`Adicione mais ${this.minimumCrewMembers-this.crew.length} tripulantes para poder enviar a nave em missão`)
+    this.inMission = true
+    alert("Nave enviada para missão")
   }
 }
 

@@ -23,8 +23,14 @@ class Menu {
                 case 2:
                     HandleUserOptionFunctions.addMemberToSpaceshipCrew();
                     break;
+                case 3:
+                    HandleUserOptionFunctions.sendToMission();
+                    break;
                 case 4:
                     alert(HandleUserOptionFunctions.listAllSpaceships());
+                    break;
+                case 5:
+                    HandleUserOptionFunctions.deleteSpaceshipMember();
                     break;
                 case 6:
                     alert("Finalizando o sistema...");
@@ -59,7 +65,7 @@ class HandleUserOptionFunctions {
         }));
     }
     static addMemberToSpaceshipCrew() {
-        __classPrivateFieldSet(this, _a, prompt(`${this.listAllSpaceships()} \n Qual o nome da nave que deseja adicionar tripulante`), "f", _HandleUserOptionFunctions_spaceshipName);
+        __classPrivateFieldSet(this, _a, prompt(`Qual o nome da nave que deseja adicionar tripulante \n ${this.listAllSpaceships()}`), "f", _HandleUserOptionFunctions_spaceshipName);
         const shipIndex = __classPrivateFieldGet(this, _a, "m", _HandleUserOptionFunctions_getShip).call(this, { name: __classPrivateFieldGet(this, _a, "f", _HandleUserOptionFunctions_spaceshipName) });
         if (shipIndex < 0)
             return alert(`Nave não encontrada`);
@@ -70,14 +76,30 @@ class HandleUserOptionFunctions {
         const text = spaceships.reduce((finalText, currentText) => {
             finalText += `
       Nome da nave: ${currentText.shipName}
-      Nome da nave: ${currentText.pilot}
-      Nome da nave: ${currentText.crewLimit}
-      Nome da nave: ${currentText.showCrewMembers()}
-      Nome da nave: ${currentText.inMission === false ? "Não" : "Sim"}
+      Nome do piloto: ${currentText.pilot}
+      Quantidade máxima de tripulantes: ${currentText.crewLimit}
+      Tripulantes: ${currentText.showCrewMembers()}
+      Em missão: ${currentText.inMission === false ? "Não" : "Sim"}
       `;
             return finalText;
         }, "");
         return text;
+    }
+    static sendToMission() {
+        __classPrivateFieldSet(this, _a, prompt(`Qual o nome da nave que deseja enviar para uma missão \n ${this.listAllSpaceships()}`), "f", _HandleUserOptionFunctions_spaceshipName);
+        const shipIndex = __classPrivateFieldGet(this, _a, "m", _HandleUserOptionFunctions_getShip).call(this, { name: __classPrivateFieldGet(this, _a, "f", _HandleUserOptionFunctions_spaceshipName) });
+        if (shipIndex < 0)
+            return alert(`Nave não encontrada`);
+        spaceships[shipIndex].sendShipToMission();
+    }
+    static deleteSpaceshipMember() {
+        __classPrivateFieldSet(this, _a, prompt(`Qual o nome da nave que deseja remover um tripulante \n ${this.listAllSpaceships()}`), "f", _HandleUserOptionFunctions_spaceshipName);
+        const shipIndex = __classPrivateFieldGet(this, _a, "m", _HandleUserOptionFunctions_getShip).call(this, { name: __classPrivateFieldGet(this, _a, "f", _HandleUserOptionFunctions_spaceshipName) });
+        if (shipIndex < 0)
+            return alert(`Nave não encontrada`);
+        __classPrivateFieldSet(this, _a, prompt(`Qual o nome do tripulante que deseja remover
+    ${spaceships[shipIndex].showCrewMembers()}`), "f", _HandleUserOptionFunctions_newCrewMember);
+        spaceships[shipIndex].removeCrewMember({ name: __classPrivateFieldGet(this, _a, "f", _HandleUserOptionFunctions_newCrewMember) });
     }
 }
 _a = HandleUserOptionFunctions, _HandleUserOptionFunctions_getShip = function _HandleUserOptionFunctions_getShip({ name }) {
@@ -94,6 +116,7 @@ class Spaceship {
         this.shipName = shipName;
         this.pilot = pilot;
         this.crewLimit = crewLimit;
+        this.minimumCrewMembers = Math.round((crewLimit / 3) - 0.5);
     }
     addCrewMember({ name }) {
         if (this.crew.length === this.crewLimit) {
@@ -117,6 +140,14 @@ class Spaceship {
             finalText += `${currentText} - `;
             return finalText;
         }, "");
+    }
+    sendShipToMission() {
+        if (this.inMission)
+            return alert("A nave já está em missão");
+        if (this.crew.length < this.minimumCrewMembers)
+            return alert(`Adicione mais ${this.minimumCrewMembers - this.crew.length} tripulantes para poder enviar a nave em missão`);
+        this.inMission = true;
+        alert("Nave enviada para missão");
     }
 }
 function start() {
